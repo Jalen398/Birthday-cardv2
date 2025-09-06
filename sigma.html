@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Happy Birthday - Interactive Card for You</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+
+    /* Reset & base */
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-family: 'Poppins', sans-serif;
+      overflow: hidden;
+      color: #222;
+      user-select: none;
+    }
+
+    /* Card container */
+    .card {
+      width: 380px;
+      height: 520px;
+      perspective: 1200px;
+      cursor: pointer;
+      position: relative;
+      border-radius: 20px;
+      box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.15),
+        0 0 40px rgba(255, 255, 255, 0.1) inset;
+      background: transparent;
+      transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 20px;
+      transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-style: preserve-3d;
+      box-shadow:
+        0 12px 40px rgba(0, 0, 0, 0.25);
+      background: #fff;
+    }
+
+    .card.flipped .card-inner {
+      transform: rotateY(180deg);
+    }
+
+    /* Front & back faces */
+    .card-front,
+    .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 20px;
+      backface-visibility: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 30px 30px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    /* Front styling */
+    .card-front {
+      background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
+      color: #fff;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      font-weight: 700;
+      font-size: 1.8rem;
+      letter-spacing: 0.05em;
+      box-shadow:
+        0 12px 40px rgba(255, 114, 140, 0.5);
+      user-select: none;
+    }
+
+    /* Back styling */
+    .card-back {
+      background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+      color: #333;
+      transform: rotateY(180deg);
+      font-weight: 500;
+      font-size: 0.95rem;
+      line-height: 1.4;
+      box-shadow:
+        0 12px 40px rgba(255, 214, 227, 0.7);
+      user-select: text;
+      overflow: visible;
+      padding: 30px 30px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-sizing: border-box;
+    }
+
+    /* Balloons container */
+    .balloons {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+      margin-bottom: 20px;
+      pointer-events: auto;
+    }
+
+    /* Balloon style */
+    .balloon {
+      width: 48px;
+      height: 72px;
+      background: #fff;
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      position: relative;
+      box-shadow:
+        inset -6px -6px 12px rgba(255 255 255 / 0.8),
+        inset 6px 6px 12px rgba(0 0 0 / 0.1),
+        0 6px 12px rgba(0 0 0 / 0.15);
+      animation: float 3s ease-in-out infinite;
+      cursor: pointer;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
+      will-change: transform, opacity;
+    }
+    .balloon:nth-child(1) {
+      background: linear-gradient(145deg, #ff6b6b, #ff4757);
+      animation-delay: 0s;
+    }
+    .balloon:nth-child(2) {
+      background: linear-gradient(145deg, #ffd93d, #ffb72b);
+      animation-delay: 0.5s;
+    }
+    .balloon:nth-child(3) {
+      background: linear-gradient(145deg, #6bcf7f, #2ed573);
+      animation-delay: 1s;
+    }
+    .balloon.burst {
+      opacity: 0;
+      transform: scale(0.5) rotate(20deg);
+      pointer-events: none;
+    }
+    .balloon::after {
+      content: '';
+      position: absolute;
+      bottom: -14px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 3px;
+      height: 14px;
+      background: rgba(0, 0, 0, 0.15);
+      border-radius: 2px;
+      filter: drop-shadow(0 1px 1px rgba(0,0,0,0.1));
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0) rotate(0deg);
+      }
+      50% {
+        transform: translateY(-15px) rotate(5deg);
+      }
+    }
+
+    /* Headings and text */
+    h1 {
+      font-weight: 700;
+      font-size: 2.4rem;
+      margin: 0 0 15px 0;
+      letter-spacing: 0.05em;
+      user-select: none;
+    }
+
+    p {
+      font-weight: 500;
+      font-size: 1rem;
+      margin: 0 0 15px 0;
+      user-select: none;
+    }
+
+    .message-text {
+      font-size: 0.95rem;
+      line-height: 1.4;
+      max-height: none;
+      overflow: visible;
+      padding-right: 8px;
+      user-select: text;
+      color: #444;
+      word-wrap: break-word;
+      margin-bottom: 20px;
+      flex-grow: 1;
+      overflow-wrap: break-word;
+    }
+
+    /* Heart styling */
+    .heart {
+      font-size: 40px;
+      color: #ff4081;
+      cursor: pointer;
+      display: inline-block;
+      transition: transform 0.3s ease, color 0.3s ease;
+      user-select: none;
+      filter: drop-shadow(0 0 2px #ff4081);
+    }
+    .heart:hover {
+      color: #e91e63;
+      transform: scale(1.2);
+      filter: drop-shadow(0 0 6px #e91e63);
+    }
+    .heart.beating {
+      animation: beat 0.8s infinite;
+      color: #d81b60;
+      filter: drop-shadow(0 0 8px #d81b60);
+    }
+    @keyframes beat {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.3); }
+    }
+
+    /* Buttons */
+    button {
+      margin-top: 15px;
+      padding: 12px 24px;
+      font-weight: 600;
+      font-size: 1rem;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      background: linear-gradient(135deg, #ff4081, #e91e63);
+      color: #fff;
+      box-shadow:
+        0 6px 12px rgba(233, 30, 99, 0.6);
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+      user-select: none;
+      outline-offset: 4px;
+    }
+    button:hover:not(:disabled) {
+      background: linear-gradient(135deg, #e91e63, #c2185b);
+      box-shadow:
+        0 8px 20px rgba(194, 24, 91, 0.8);
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      box-shadow: none;
+      color: #666;
+    }
+
+    /* Confetti container */
+    .confetti {
+      pointer-events: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      z-index: 10;
+      display: none;
+    }
+
+    /* Confetti pieces */
+    .confetti-piece {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: #fff;
+      opacity: 0.9;
+      border-radius: 3px;
+      will-change: transform, opacity;
+      animation: fall 3.5s ease-in forwards;
+      filter: drop-shadow(0 0 2px rgba(0,0,0,0.1));
+    }
+
+    @keyframes fall {
+      to {
+        transform: translateY(110vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 440px) {
+      .card {
+        width: 320px;
+        height: 460px;
+      }
+      h1 {
+        font-size: 1.8rem;
+      }
+      p, .message-text {
+        font-size: 0.9rem;
+      }
+      button {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+      }
+      .balloon {
+        width: 40px;
+        height: 60px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card" id="card" aria-label="Interactive birthday card">
+    <div class="card-inner">
+      <div class="card-front" role="img" aria-label="Birthday card front with balloons and cake">
+        <div class="balloons" aria-hidden="true">
+          <div class="balloon" id="balloon1" tabindex="0" aria-label="Red balloon"></div>
+          <div class="balloon" id="balloon2" tabindex="0" aria-label="Yellow balloon"></div>
+          <div class="balloon" id="balloon3" tabindex="0" aria-label="Green balloon"></div>
+        </div>
+        <h1>Happy Birthday!</h1>
+        <p>Click anywhere to open your card</p>
+        <img
+          src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/663eca13-b0b2-4275-94d8-6c8707d739ca.png"
+          alt="Animated birthday cake with colorful frosting and candles, surrounded by floating balloons in pastel colors against a soft pastel background"
+          style="width: 85%; margin-top: 15px; border-radius: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.15);"
+          loading="lazy"
+        />
+      </div>
+      <div class="card-back" role="region" aria-live="polite" aria-label="Birthday message">
+        <h1>To My Crush</h1>
+        <p class="message-text" id="typingMessage" aria-atomic="true" aria-relevant="text"></p>
+        <div id="heartContainer" style="margin: 20px 0; text-align: center;">
+          <span class="heart" id="heart" role="button" tabindex="0" aria-pressed="false" aria-label="Like this card">&hearts;</span>
+          <p style="font-size: 0.85rem; color: #666; margin-top: 8px;">Click the heart if you like this card!</p>
+        </div>
+        <button id="blowCandles" type="button" aria-live="polite">Blow Out the Candles</button>
+        <button id="closeCard" type="button" aria-label="Close card and reload page">Close Card</button>
+      </div>
+    </div>
+    <div class="confetti" id="confetti" aria-hidden="true"></div>
+  </div>
+
+  <script>
+    (() => {
+      const card = document.getElementById('card');
+      const confetti = document.getElementById('confetti');
+      const balloons = document.querySelectorAll('.balloon');
+      const heart = document.getElementById('heart');
+      const blowCandles = document.getElementById('blowCandles');
+      const closeCard = document.getElementById('closeCard');
+      const typingMessage = document.getElementById('typingMessage');
+
+      const fullMessage =
+        "Wishing you a day filled with joy and laughter. You're amazing and I think of you often. Hope this year brings you everything you've dreamed of! With all my heart, Amelia";
+
+      let messageIndex = 0;
+      let typingTimeout;
+
+      // Typing effect function
+      function startTyping() {
+        if (messageIndex < fullMessage.length) {
+          typingMessage.textContent += fullMessage.charAt(messageIndex);
+          messageIndex++;
+          typingTimeout = setTimeout(startTyping, 40);
+        }
+      }
+
+      // Flip card on first click
+      card.addEventListener('click', (e) => {
+        // Prevent flipping if clicking buttons or balloons
+        if (
+          e.target.closest('button') ||
+          e.target.classList.contains('balloon') ||
+          card.classList.contains('flipped')
+        ) {
+          return;
+        }
+        card.classList.add('flipped');
+        startTyping();
+      });
+
+      // Balloon burst effect
+      balloons.forEach((balloon) => {
+        balloon.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (balloon.classList.contains('burst')) return;
+          balloon.classList.add('burst');
+          triggerConfetti(20);
+        });
+        // Keyboard accessibility for balloons
+        balloon.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            balloon.click();
+          }
+        });
+      });
+
+      // Heart toggle animation
+      heart.addEventListener('click', () => {
+        const isBeating = heart.classList.toggle('beating');
+        heart.setAttribute('aria-pressed', isBeating);
+      });
+      heart.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          heart.click();
+        }
+      });
+
+      // Blow out candles button
+      blowCandles.addEventListener('click', () => {
+        blowCandles.textContent = 'Candles Blown Out!';
+        blowCandles.disabled = true;
+        triggerConfetti(100);
+      });
+
+      // Close card button reloads page
+      closeCard.addEventListener('click', () => {
+        location.reload();
+      });
+
+      // Confetti generator
+      function triggerConfetti(amount) {
+        confetti.style.display = 'block';
+        for (let i = 0; i < amount; i++) {
+          const piece = document.createElement('div');
+          piece.className = 'confetti-piece';
+          piece.style.left = Math.random() * 100 + '%';
+          piece.style.top = Math.random() * 20 + '%';
+          piece.style.background = `hsl(${Math.random() * 360}, 90%, 65%)`;
+          piece.style.animationDelay = (Math.random() * 2).toFixed(2) + 's';
+          piece.style.transform = `rotate(${Math.random() * 360}deg)`;
+          confetti.appendChild(piece);
+        }
+        setTimeout(() => {
+          confetti.innerHTML = '';
+          confetti.style.display = 'none';
+        }, 3500);
+      }
+    })();
+  </script>
+</body>
+</html>
